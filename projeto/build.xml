@@ -1,0 +1,85 @@
+<project name="projeto" default="main" basedir=".">
+	<description>A sample build file for this project</description>
+	<!-- global properties for this build file -->
+	<property name="source.dir" location="src/projeto" />
+	<property name="test.dir" location="src/projeto" />
+	<property name="build.dir" location="bin" />
+	<property name="doc.dir" location="docs" />
+	<property name="build.test.dir" location="bin/tests" />
+
+	<!-- Variable used for JUnit testin -->
+	<property name="test.report.dir" location="testreport" />
+	
+	<!-- Define the classpath which includes the junit.jar and the classes after compiling-->
+	<path id="junit.class.path">
+		<pathelement location="lib/junit-4.12.jar" />
+		<pathelement location="lib/hamcrest-core-1.3.jar" />
+		<pathelement location="${build.dir}" />
+	</path>
+
+	<!-- set up some directories used by this project -->
+	<target name="init" description="setup project directories">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${doc.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		<mkdir dir="${test.report.dir}" />
+	</target>
+
+	<!-- Compile the java code in ${src.dir}/${test.dir} into ${build.dir}/${build.test.dir} -->
+	<target name="compile" description="compile java sources">
+		<javac srcdir="${source.dir}" destdir="${build.dir}" includeantruntime="false">
+			<classpath refid="junit.class.path" />
+		</javac>
+		<javac srcdir="${test.dir}" destdir="${build.test.dir}" includeantruntime="false">
+			<classpath refid="junit.class.path" />
+		</javac>
+	</target>
+	
+
+	<!-- Generate javadocs for current project into ${doc.dir} -->
+	<target name="doc" description="generate documentation">
+		<javadoc sourcepath="${source.dir}" destdir="${doc.dir}">
+			<classpath refid="junit.class.path" />
+		</javadoc>	
+	</target> 
+	
+	<!-- Run the JUnit Tests -->
+	<!-- Output is XML, could also be plain-->
+	<target name="junit">
+		<junit printsummary="on" fork="true" haltonfailure="yes">
+			<classpath refid="junit.class.path" />
+			<classpath>
+			    <pathelement location="${build.test.dir}"/>
+			  </classpath>
+			<formatter type="xml" />
+			<batchtest todir="${test.report.dir}">
+				<fileset dir="${test.dir}">
+					<include name="**/*Test*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+	
+	<!-- Delete the build, doc & test directories and Emacs backup (*~) files -->
+	<target name="clean" description="tidy up the workspace">
+		<delete dir="${build.dir}" />
+		<delete dir="${doc.dir}" />
+		<delete dir="${build.test.dir}" />
+		<delete dir="${test.report.dir}" />
+		<delete>
+			<fileset defaultexcludes="no" dir="${source.dir}" includes="**/*~" />
+		</delete>
+	</target>
+	
+	<!-- Create jar file --> 
+	<target name="package">
+			<mkdir dir="jar" />
+			<jar basedir="bin" destfile="jar/aplicacao.jar" />
+	</target>
+
+	<target name="main" depends="clean, init, compile, junit, doc, package ">
+		<description>Main target</description>
+	</target>
+
+</project>
